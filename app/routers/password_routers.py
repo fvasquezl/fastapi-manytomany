@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
-from app.models.password import PasswordDB
-from app.models.tag import TagDB
-from app.schemas.password import PasswordCreate, Password
-from app.schemas.tag import Tag
+from app.models.password_model import PasswordDB
+from app.models.tag_model import TagDB
+from app.schemas.password_schema import PasswordCreate, Password
+from app.schemas.tag_schema import Tag
 
 from typing import List
 

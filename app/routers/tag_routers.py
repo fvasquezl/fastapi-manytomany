@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
-from app.models.tag import TagDB
-from app.schemas.tag import Tag, TagCreate
+from app.models.tag_model import TagDB
+from app.schemas.tag_schema import Tag, TagCreate
 
 from typing import List
 
