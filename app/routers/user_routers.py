@@ -1,31 +1,37 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
-from app.models.user_model import UserDB
-from app.schemas.user_schema import User, UserCreate
+from app.db.core import NotFoundError, get_db
+from app.db.users import (
+    User,
+    UserCreate,
+    # UserUpdate,
+    read_db_user,
+    create_db_user,
+    # update_db_user,
+    delete_db_user,
+    read_db_passwords_for_user,
+)
 
-
-user_router = APIRouter()
-
-
-def get_db(request: Request):
-    return request.state.db
+router = APIRouter(
+    prefix="/users",
+)
 
 
 # Rutas para usuarios
 
 
-@user_router.post("/users/", response_model=User)
-def create_user(user: UserCreate, db: Session = Depends(get_db)):
-    db_user = UserDB(**user.model_dump())
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return db_user
+@router.post("/")
+def create_user(
+    request: Request, user: UserCreate, db: Session = Depends(get_db)
+) -> User:
+    db_user = create_db_user(user, db)
+    return User(**db_user.__dict__)
 
 
-@user_router.get("/users/{user_id}", response_model=User)
-def read_user(user_id: int, db: Session = Depends(get_db)):
-    db_user = db.query(UserDB).filter(UserDB.id == user_id).first()
-    if db_user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    return db_user
+@router.get("/{user_id}", response_model=User)
+def read_user(request: Request, user_id: int, db: Session = Depends(get_db)) -> User:
+    try:
+        db_user = read_db_user(user_id, db)
+    except NotFoundError as e:
+        raise HTTPException(status_code=400) from e
+    return User(**db_user.__dict__)
