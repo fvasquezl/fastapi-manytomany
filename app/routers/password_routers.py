@@ -20,11 +20,14 @@ router = APIRouter(
 
 
 # Rutas para las passwords
-@router.post("")
+@router.post("/{user_id}/{category_id}")
 def create_password(
-    password: PasswordCreate, db: Session = Depends(get_db)
+    category_id: int,
+    user_id: int,
+    password: PasswordCreate,
+    db: Session = Depends(get_db),
 ) -> Password:
-    db_password = create_db_password(password, db)
+    db_password = create_db_password(category_id, user_id, password, db)
     return Password(**db_password.__dict__)
 
 

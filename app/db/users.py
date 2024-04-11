@@ -1,6 +1,6 @@
 import datetime
-from typing import Annotated, Optional
-from pydantic import BaseModel, Field
+from typing import Optional
+from pydantic import BaseModel
 from .core import DBUser, DBPassword, NotFoundError
 from sqlalchemy.orm import Session
 from datetime import datetime
@@ -9,6 +9,7 @@ from datetime import datetime
 class UserBase(BaseModel):
     name: str
     email: str
+    full_name: str | None = None
 
 
 class UserCreate(UserBase):
@@ -18,10 +19,12 @@ class UserCreate(UserBase):
 class UserUpdate(BaseModel):
     name: Optional[str] = None
     email: Optional[str] = None
+    full_name: Optional[str] = None
 
 
 class User(UserBase):
     id: int
+    disabled: bool | None = None
     created_at: datetime
     updated_at: datetime
 

@@ -25,6 +25,7 @@ class DBUser(Base):
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     name: Mapped[str]
     email: Mapped[str]
+    full_name: Mapped[str]
     password: Mapped[str]
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=datetime.now()
@@ -57,7 +58,7 @@ class DBTag(Base):
     __tablename__ = "tag"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    nombre: Mapped[str]
+    name: Mapped[str]
     slug: Mapped[str]
 
     passwords: Mapped[List["DBPassword"]] = relationship(
@@ -69,7 +70,8 @@ class DBPassword(Base):
     __tablename__ = "password"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    nombre: Mapped[str]
+    name: Mapped[str]
+    description: Mapped[str]
     slug: Mapped[str]
 
     category_id: Mapped[int] = mapped_column(ForeignKey("categories.id"))
