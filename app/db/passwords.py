@@ -1,9 +1,10 @@
 from pydantic import BaseModel
 from typing import List, Optional
 from sqlalchemy.orm import Session
-from .core import DBPassword, NotFoundError
+from .core import DBPassword, NotFoundError, passwords_tags
 from .users import read_db_user
 from .categories import read_db_category
+from .tags import Tag, read_db_tag
 
 
 class PasswordBase(BaseModel):
@@ -37,13 +38,22 @@ def read_db_password(password_id: int, session: Session) -> DBPassword:
 
 
 def create_db_password(
-    category_id: int, user_id: int, password: PasswordCreate, session: Session
+    category_id: int,
+    user_id: int,
+    password: PasswordCreate,
+    tags: List[int],
+    session: Session,
 ) -> DBPassword:
     user = read_db_user(user_id, session)
     category = read_db_category(category_id, session)
     db_password = DBPassword(**password.model_dump())
-    db_password.user_id = user.id
-    db_password.category_id = category.id
+
+    for tag_id in tags:
+        tag = read_db_tag(tag_id, session)
+        db_password.tags.append(tag)
+
+    db_password.user = user
+    db_password.category = category
     session.add(db_password)
     session.commit()
     session.refresh(db_password)

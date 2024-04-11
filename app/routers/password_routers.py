@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Body, Depends, HTTPException, Request
 from fastapi.params import Depends
 from sqlalchemy.orm import Session
 from app.db.core import get_db, NotFoundError
@@ -20,14 +20,15 @@ router = APIRouter(
 
 
 # Rutas para las passwords
-@router.post("/{user_id}/{category_id}")
+@router.post("/{user_id}/{category_id}/tags")
 def create_password(
     category_id: int,
     user_id: int,
     password: PasswordCreate,
+    tags: List[int] = Body(...),
     db: Session = Depends(get_db),
 ) -> Password:
-    db_password = create_db_password(category_id, user_id, password, db)
+    db_password = create_db_password(category_id, user_id, password, tags, db)
     return Password(**db_password.__dict__)
 
 
