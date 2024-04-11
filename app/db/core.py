@@ -26,9 +26,13 @@ class DBUser(Base):
     name: Mapped[str]
     email: Mapped[str]
     password: Mapped[str]
-    create_at: Mapped[datetime.date] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=datetime.now()
     )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=datetime.now()
+    )
+
     passwords: Mapped[List["DBPassword"]] = relationship(back_populates="user")
 
 

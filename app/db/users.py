@@ -1,8 +1,9 @@
-from typing import Optional
-from pydantic import BaseModel
+import datetime
+from typing import Annotated, Optional
+from pydantic import BaseModel, Field
 from .core import DBUser, DBPassword, NotFoundError
 from sqlalchemy.orm import Session
-from datetime import date
+from datetime import datetime
 
 
 class UserBase(BaseModel):
@@ -14,14 +15,15 @@ class UserCreate(UserBase):
     password: str
 
 
-# class UserUpdate(BaseModel):
-#     name: Optional[str] = None
-#     email: Optional[str] = None
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    email: Optional[str] = None
 
 
 class User(UserBase):
     id: int
-    create_at: date
+    created_at: datetime
+    updated_at: datetime
 
     class Config:
         from_attributes = True
@@ -47,18 +49,18 @@ def create_db_user(user: UserCreate, session: Session) -> DBUser:
     return db_user
 
 
-# def update_db_user(user_id: int, user: UserUpdate, session: Session) -> DBUser:
-#     db_user = read_db_user(user_id, session)
-#     for key, value in user.model_dump(exclude_none=True).users():
-#         setattr(db_user, key, value)
-#     session.commit()
-#     session.refresh(db_user)
+def update_db_user(user_id: int, user: UserUpdate, session: Session) -> DBUser:
+    db_user = read_db_user(user_id, session)
+    for key, value in user.model_dump(exclude_none=True).items():
+        setattr(db_user, key, value)
+    session.commit()
+    session.refresh(db_user)
 
-#     # get the passwords
-#     # passwords = read_db_passwords_for_user(db_user.id, session)
-#     # run_passwords(passwords)
+    # get the passwords
+    # passwords = read_db_passwords_for_user(db_user.id, session)
+    # run_passwords(passwords)
 
-#     return db_user
+    return db_user
 
 
 def delete_db_user(user_id: int, session: Session) -> DBUser:

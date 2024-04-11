@@ -4,13 +4,16 @@ from app.db.core import NotFoundError, get_db
 from app.db.users import (
     User,
     UserCreate,
-    # UserUpdate,
+    UserUpdate,
     read_db_user,
     create_db_user,
-    # update_db_user,
+    update_db_user,
     delete_db_user,
     read_db_passwords_for_user,
 )
+
+from app.db.passwords import Password
+
 
 router = APIRouter(
     prefix="/users",
@@ -34,4 +37,35 @@ def read_user(request: Request, user_id: int, db: Session = Depends(get_db)) -> 
         db_user = read_db_user(user_id, db)
     except NotFoundError as e:
         raise HTTPException(status_code=400) from e
+    return User(**db_user.__dict__)
+
+
+@router.get("/{item_id}/passwords")
+def read_item_automations(
+    request: Request, item_id: int, db: Session = Depends(get_db)
+) -> list[Password]:
+    try:
+        automations = read_db_passwords_for_user(item_id, db)
+    except NotFoundError as e:
+        raise HTTPException(status_code=404) from e
+    return [Password(**automation.__dict__) for automation in automations]
+
+
+@router.put("/{user_id}")
+def update_user(
+    request: Request, user_id: int, user: UserUpdate, db: Session = Depends(get_db)
+) -> User:
+    try:
+        db_user = update_db_user(user_id, user, db)
+    except NotFoundError as e:
+        raise HTTPException(status_code=404) from e
+    return User(**db_user.__dict__)
+
+
+@router.delete("/{user_id}")
+def delete_user(request: Request, user_id: int, db: Session = Depends(get_db)) -> User:
+    try:
+        db_user = delete_db_user(user_id, db)
+    except NotFoundError as e:
+        raise HTTPException(status_code=404) from e
     return User(**db_user.__dict__)

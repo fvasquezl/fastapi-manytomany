@@ -1,52 +1,90 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.params import Depends
 from sqlalchemy.orm import Session
-from app.models.password_model import PasswordDB
-from app.models.tag_model import TagDB
-from app.schemas.password_schema import PasswordCreate, Password
-from app.schemas.tag_schema import Tag
+from app.db.core import get_db, NotFoundError
+from app.db.passwords import (
+    Password,
+    PasswordCreate,
+    PasswordUpdate,
+    create_db_password,
+    delete_db_password,
+    read_db_password,
+    update_db_password,
+)
 
 from typing import List
 
-password_router = APIRouter()
+router = APIRouter(
+    prefix="/passwords",
+)
 
 
-def get_db(request: Request):
-    return request.state.db
-
-
-# Rutas para las contraseñas
-@password_router.post("/passwords/", response_model=Password)
+# Rutas para las passwords
+@router.post("")
 def create_password(
-    password: PasswordCreate, tag_ids: List[int], db: Session = Depends(get_db)
-):
-    db_password = PasswordDB(**password.model_dump())
-
-    for tag_id in tag_ids:
-        tag = db.query(TagDB).filter(TagDB.id == tag_id).first()
-        if tag is None:
-            raise HTTPException(
-                status_code=404, detail=f"Tag with id {tag_id} not found"
-            )
-        db_password.tags.append(tag)
-
-    db.add(db_password)
-    db.commit()
-    db.refresh(db_password)
-    return db_password
+    password: PasswordCreate, db: Session = Depends(get_db)
+) -> Password:
+    db_password = create_db_password(password, db)
+    return Password(**db_password.__dict__)
 
 
-@password_router.get("/passwords/{password_id}", response_model=Password)
-def read_password(password_id: int, db: Session = Depends(get_db)):
-    password = db.query(PasswordDB).filter(PasswordDB.id == password_id).first()
-    if password is None:
-        raise HTTPException(status_code=404, detail="Password not found")
-    return password
+@router.get("/{password_id}")
+def read_password(
+    request: Request, password_id: int, db: Session = Depends(get_db)
+) -> Password:
+    try:
+        db_password = read_db_password(password_id, db)
+    except NotFoundError as e:
+        raise HTTPException(status_code=404) from e
+    return Password(**db_password.__dict__)
 
 
-# Ruta para obtener los tags relacionados con un password
-@password_router.get("/passwords/{password_id}/tags/", response_model=List[Tag])
-def get_tags_for_password(password_id: int, db: Session = Depends(get_db)):
-    password = db.query(PasswordDB).filter(PasswordDB.id == password_id).first()
-    if password is None:
-        raise HTTPException(status_code=404, detail="Password not found")
-    return password.tags
+@router.put("/{password_id}")
+def update_password(
+    password_id: int,
+    password: PasswordUpdate,
+    db: Session = Depends(get_db),
+) -> Password:
+    try:
+        db_password = update_db_password(password_id, password, db)
+    except NotFoundError as e:
+        raise HTTPException(status_code=404) from e
+    return Password(**db_password.__dict__)
+
+
+@router.delete("/{password_id}")
+def delete_item(password_id: int, db: Session = Depends(get_db)) -> Password:
+    try:
+        db_password = delete_db_password(password_id, db)
+    except NotFoundError as e:
+        raise HTTPException(status_code=404) from e
+    return Password(**db_password.__dict__)
+
+
+# @router.post("/passwords/", response_model=Password)
+# def create_password(
+#     password: PasswordCreate, tag_ids: List[int], db: Session = Depends(get_db)
+# ):
+#     db_password = Password(**password.model_dump())
+
+#     for tag_id in tag_ids:
+#         tag = db.query(TagDB).filter(TagDB.id == tag_id).first()
+#         if tag is None:
+#             raise HTTPException(
+#                 status_code=404, detail=f"Tag with id {tag_id} not found"
+#             )
+#         db_password.tags.append(tag)
+
+#     db.add(db_password)
+#     db.commit()
+#     db.refresh(db_password)
+#     return db_password
+
+
+# # Ruta para obtener los tags relacionados con un password
+# @router.get("/passwords/{password_id}/tags/", response_model=List[Tag])
+# def get_tags_for_password(password_id: int, db: Session = Depends(get_db)):
+#     password = db.query(Password).filter(Password.id == password_id).first()
+#     if password is None:
+#         raise HTTPException(status_code=404, detail="Password not found")
+#     return password.tags
