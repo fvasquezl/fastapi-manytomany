@@ -9,10 +9,10 @@ from app.db.categories import (
     create_db_category,
     update_db_category,
     delete_db_category,
-    # read_db_passwords_for_category,
+    # read_db_posts_for_category,
 )
 
-from app.db.passwords import Password
+from app.db.posts import Post
 
 
 router = APIRouter(
@@ -42,15 +42,15 @@ def read_category(
     return Category(**db_category.__dict__)
 
 
-# @router.get("/{item_id}/passwords")
+# @router.get("/{item_id}/posts")
 # def read_item_automations(
 #     request: Request, item_id: int, db: Session = Depends(get_db)
-# ) -> list[Password]:
+# ) -> list[Post]:
 #     try:
-#         automations = read_db_passwords_for_category(item_id, db)
+#         automations = read_db_posts_for_category(item_id, db)
 #     except NotFoundError as e:
 #         raise HTTPException(status_code=404) from e
-#     return [Password(**automation.__dict__) for automation in automations]
+#     return [Post(**automation.__dict__) for automation in automations]
 
 
 @router.put("/{category_id}")

@@ -1,9 +1,8 @@
-import datetime
+from datetime import datetime
 from typing import Annotated, Optional, List
 from pydantic import BaseModel, Field, validator
-from .core import DBCategory, DBPassword, NotFoundError
+from .core import DBCategory, DBPost, NotFoundError
 from sqlalchemy.orm import Session
-from datetime import datetime
 import re
 
 
@@ -37,6 +36,8 @@ class CategoryUpdate(CategoryBase):
 
 class Category(CategoryBase):
     id: int
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -49,10 +50,10 @@ def read_db_category(category_id: int, session: Session) -> DBCategory:
     return db_category
 
 
-def read_db_passwords_for_category(
+def read_db_posts_for_category(
     category_id: int, session: Session
-) -> list[DBPassword]:
-    return session.query(DBPassword).filter(DBPassword.category_id == category_id).all()
+) -> list[DBPost]:
+    return session.query(DBPost).filter(DBPost.category_id == category_id).all()
 
 
 def create_db_category(category: CategoryCreate, session: Session) -> DBCategory:
@@ -73,9 +74,9 @@ def update_db_category(
     session.commit()
     session.refresh(db_category)
 
-    # get the passwords
-    # passwords = read_db_passwords_for_category(db_category.id, session)
-    # run_passwords(passwords)
+    # get the posts
+    # posts = read_db_posts_for_category(db_category.id, session)
+    # run_posts(posts)
 
     return db_category
 

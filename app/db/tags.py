@@ -1,6 +1,7 @@
+from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, validator
-from .core import DBTag, DBTag, DBPassword, NotFoundError
+from .core import DBTag, DBTag, DBPost, NotFoundError
 from sqlalchemy.orm import Session
 import re
 
@@ -37,6 +38,8 @@ class TagUpdate(TagBase):
 
 class Tag(TagBase):
     id: Optional[int] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -49,8 +52,8 @@ def read_db_tag(tag_id: int, session: Session) -> DBTag:
     return db_tag
 
 
-def read_db_passwords_for_tag(tag_id: int, session: Session) -> list[DBPassword]:
-    return session.query(DBPassword).filter(DBPassword.tag_id == tag_id).all()
+def read_db_posts_for_tag(tag_id: int, session: Session) -> list[DBPost]:
+    return session.query(DBPost).filter(DBPost.tag_id == tag_id).all()
 
 
 def create_db_tag(tag: TagCreate, session: Session) -> DBTag:
@@ -69,9 +72,9 @@ def update_db_tag(tag_id: int, tag: TagUpdate, session: Session) -> DBTag:
     session.commit()
     session.refresh(db_tag)
 
-    # get the passwords
-    # passwords = read_db_passwords_for_tag(db_tag.id, session)
-    # run_passwords(passwords)
+    # get the posts
+    # posts = read_db_posts_for_tag(db_tag.id, session)
+    # run_posts(posts)
 
     return db_tag
 

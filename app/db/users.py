@@ -1,9 +1,8 @@
-import datetime
+from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel
-from .core import DBUser, DBPassword, NotFoundError
+from .core import DBUser, DBPost, NotFoundError
 from sqlalchemy.orm import Session
-from datetime import datetime
 
 
 class UserBase(BaseModel):
@@ -25,8 +24,8 @@ class UserUpdate(BaseModel):
 class User(UserBase):
     id: int
     disabled: bool | None = None
-    created_at: datetime
-    updated_at: datetime
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -39,8 +38,8 @@ def read_db_user(user_id: int, session: Session) -> DBUser:
     return db_user
 
 
-def read_db_passwords_for_user(user_id: int, session: Session) -> list[DBPassword]:
-    return session.query(DBPassword).filter(DBPassword.user_id == user_id).all()
+def read_db_posts_for_user(user_id: int, session: Session) -> list[DBPost]:
+    return session.query(DBPost).filter(DBPost.user_id == user_id).all()
 
 
 def create_db_user(user: UserCreate, session: Session) -> DBUser:
@@ -59,9 +58,9 @@ def update_db_user(user_id: int, user: UserUpdate, session: Session) -> DBUser:
     session.commit()
     session.refresh(db_user)
 
-    # get the passwords
-    # passwords = read_db_passwords_for_user(db_user.id, session)
-    # run_passwords(passwords)
+    # get the posts
+    # posts = read_db_posts_for_user(db_user.id, session)
+    # run_posts(posts)
 
     return db_user
 
