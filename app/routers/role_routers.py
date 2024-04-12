@@ -35,12 +35,12 @@ def read_role(request: Request, role_id: int, db: Session = Depends(get_db)) -> 
     return Role(**db_role.__dict__)
 
 
-@router.get("/{item_id}/users")
-def read_item_automations(
-    request: Request, item_id: int, db: Session = Depends(get_db)
+@router.get("/{role_id}/users")
+def read_role_automations(
+    request: Request, role_id: int, db: Session = Depends(get_db)
 ) -> list[User]:
     try:
-        automations = read_db_users_for_role(item_id, db)
+        automations = read_db_users_for_role(role_id, db)
     except NotFoundError as e:
         raise HTTPException(status_code=404) from e
     return [User(**automation.__dict__) for automation in automations]

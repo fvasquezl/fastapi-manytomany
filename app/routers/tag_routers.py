@@ -35,12 +35,12 @@ def read_tag(request: Request, tag_id: int, db: Session = Depends(get_db)) -> Ta
     return Tag(**db_tag.__dict__)
 
 
-@router.get("/{item_id}/posts")
-def read_item_automations(
-    request: Request, item_id: int, db: Session = Depends(get_db)
+@router.get("/{tag_id}/posts")
+def read_tag_automations(
+    request: Request, tag_id: int, db: Session = Depends(get_db)
 ) -> list[Post]:
     try:
-        automations = read_db_posts_for_tag(item_id, db)
+        automations = read_db_posts_for_tag(tag_id, db)
     except NotFoundError as e:
         raise HTTPException(status_code=404) from e
     return [Post(**automation.__dict__) for automation in automations]

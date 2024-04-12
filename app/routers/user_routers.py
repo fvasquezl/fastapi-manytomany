@@ -40,12 +40,12 @@ def read_user(request: Request, user_id: int, db: Session = Depends(get_db)) -> 
     return User(**db_user.__dict__)
 
 
-@router.get("/{item_id}/posts")
-def read_item_automations(
-    request: Request, item_id: int, db: Session = Depends(get_db)
+@router.get("/{user_id}/posts")
+def read_user_automations(
+    request: Request, user_id: int, db: Session = Depends(get_db)
 ) -> list[Post]:
     try:
-        automations = read_db_posts_for_user(item_id, db)
+        automations = read_db_posts_for_user(user_id, db)
     except NotFoundError as e:
         raise HTTPException(status_code=404) from e
     return [Post(**automation.__dict__) for automation in automations]
